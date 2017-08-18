@@ -4,53 +4,71 @@ const jwt = require('jsonwebtoken')
 
 const PAYLOAD_DEFAULT_KEYS = ['exp', 'nbf', 'sub', 'aud', 'iss']
 
+const confSymbol = Symbol('jwt#conf')
+
 bcore.on('jwt', {
     alg: 'HS256',
     secret: 'bcore-jwt',
     cert: '',
     exp: Math.floor(Date.now() / 1000) + (60 * 60)
-}, function () {
+}, function() {
 
-    this.__init = function (options) {
+    this.__init = function(options) {
 
-        this.payload = {}
+        let conf = {}
+
+        conf.payload = {}
 
         PAYLOAD_DEFAULT_KEYS.forEach(item => {
             if (options[item]) {
-                this.payload[item] = options[item]
+                conf.payload[item] = options[item]
             }
         })
 
-        this.secretOrPrivateKey = options.privateKey || options.secret
+        conf.secretOrPrivateKey = options.privateKey || options.secret
 
-        this.secretOrPublichKey = options.publicKey || options.secret
+        conf.secretOrPublichKey = options.publicKey || options.secret
 
-        this.alg = options.alg || 'HS256'
+        conf.alg = options.alg || 'HS256'
+
+        this[confSymbol] = conf
     }
 
-    this.sign = function (payload) {
+    /**
+     * 签名
+     *
+     * @param {Hash} payload 载荷
+     *
+     * @return {Promise}
+     */
+    this.sign = function(payload) {
 
-        let curPayload
+        let conf = this[confSymbol]
 
-        if (!payload) {
-            curPayload = this.payload
-        } else {
-            curPayload = Object.assign(this.payload, payload)
-        }
+        let curPayload = payload ? Object.assign(conf.payload, payload) : conf.payload
 
         return new Promise((resolve, reject) => {
-            jwt.sign(curPayload, this.secretOrPrivateKey, {
-                algorithm: this.alg
+            jwt.sign(curPayload, conf.secretOrPrivateKey, {
+                algorithm: conf.alg
             }, (err, token) => err ? reject(err) : resolve(token))
         })
     }
 
-    this.verify = function (token) {
+    /**
+     * 签证签名
+     * 
+     * @param {String} token 待验证的签名字符串
+     * 
+     * @return {Promise}
+     */
+    this.verify = function(token) {
+
+        let conf = this[confSymbol]
 
         return new Promise((resolve, reject) => {
 
-            jwt.verify(token, this.secretOrPublichKey, {
-                algorithms: [this.alg]
+            jwt.verify(token, conf.secretOrPublichKey, {
+                algorithms: [conf.alg]
             }, (err, payload) => err ? reject(err) : resolve(payload))
 
         })

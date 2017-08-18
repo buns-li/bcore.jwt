@@ -7,6 +7,8 @@ class JWTCLA {
 
     async test() {
 
+        console.log(this.msrv.jwt)
+
         let token = await this.msrv.jwt.sign({
             sub: 'userID'
         })
@@ -16,7 +18,6 @@ class JWTCLA {
         let payload = await this.msrv.jwt.verify(token)
 
         console.log('payload:', payload)
-
     }
 }
 

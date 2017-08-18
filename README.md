@@ -1,17 +1,25 @@
 # bcore-jwt
-a jwt mini-server of bcore 
 
+bcore微服务--jwt认证
 
-just wrapper [jsonwebtoken](https://github.com/auth0/node-jsonwebtoken) package ,and register it as `bcore`'s mini-server
+基于 [jsonwebtoken](https://github.com/auth0/node-jsonwebtoken)
 
-only exports two functions:
+## API
 
 **sign(payload)**:
+生成签名
 
-* generate jwt token string
-* return `Promise`
-* `payload` is HashMap
+* `payload`:[`Hash`]:载荷
+
+```js
+ this.msrv.hashpsw.sign({}).then().catch()
+```
 
 **verify(token)**:
+验证签名字符串
 
-* return `Promise`
+* `token`:[`String`] 已签名的字符串
+
+```js
+ this.msrv.hashpsw.verify({}).then().catch()
+```
